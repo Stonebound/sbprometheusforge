@@ -71,9 +71,10 @@ public class SbPrometheus {
     private int serverTicks = 0;
 
     @SubscribeEvent
-    public void onServerTick(TickEvent event) {
-        if (serverTicks % 1200 == 0) {
-            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+    public void onServerTick(TickEvent.ServerTickEvent event) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (serverTicks % 600 == 0) {
+
             players.labels("online").set(server.getCurrentPlayerCount());
             players.labels("max").set(server.getMaxPlayers());
 
@@ -81,7 +82,7 @@ public class SbPrometheus {
                 loadedChunks.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getChunkProvider().chunkManager.getLoadedChunkCount());
                 playersOnline.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getPlayers().size());
                 entities.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getEntities().count());
-                tileEntities.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.loadedTileEntityList.size());
+                tileEntities.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getWorld().tickableTileEntities.size());
             }
             double meanTickTime = Math.min(1000.0/ (mean(server.tickTimeArray) * 1.0E-6D), 20);
 
@@ -91,6 +92,13 @@ public class SbPrometheus {
             memory.labels("free").set(Runtime.getRuntime().freeMemory());
             memory.labels("used").set(Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory());
         }
+//        if (serverTicks % 60 == 0) {
+//            for (ServerWorld serverWorld : server.getWorlds()) {
+//                if (serverWorld.dimension.getType().getId() == 0) {
+//                    LOGGER.warn(serverWorld.getWorld().tickableTileEntities.size());
+//                }
+//            }
+//        }
         serverTicks++;
     }
 
