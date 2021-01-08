@@ -7,13 +7,16 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,6 +42,8 @@ public class SbPrometheus {
     private static final Gauge memory = Gauge.build().name("mc_jvm_memory").help("JVM memory usage").labelNames("type").create().register();
 
     public SbPrometheus() {
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_CONFIG);
         Config.loadConfig(Config.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve("sbprometheus-common.toml"));
@@ -49,7 +54,7 @@ public class SbPrometheus {
         PORT = Config.PORT.get();
         try {
 //            new MetricsController().register();
-            server = new HTTPServer(PORT, true);
+            server = new HTTPServer(PORT, false);
             LOGGER.info("Started Prometheus metrics endpoint on port " + PORT);
 
         } catch (Exception e) {
@@ -63,7 +68,7 @@ public class SbPrometheus {
             try {
                 server.stop();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("error stopping", e);
             }
         }
     }
@@ -79,14 +84,14 @@ public class SbPrometheus {
             players.labels("max").set(server.getMaxPlayers());
 
             for (ServerWorld serverWorld : server.getWorlds()) {
-                loadedChunks.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getChunkProvider().chunkManager.getLoadedChunkCount());
-                playersOnline.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getPlayers().size());
-                entities.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getEntities().count());
-                tileEntities.labels("DIM" + serverWorld.dimension.getType().getId()).set(serverWorld.getWorld().tickableTileEntities.size());
+                loadedChunks.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getChunkProvider().chunkManager.getLoadedChunkCount());
+                playersOnline.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getPlayers().size());
+                entities.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getEntities().count());
+                tileEntities.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getWorld().tickableTileEntities.size());
             }
-            double meanTickTime = Math.min(1000.0/ (mean(server.tickTimeArray) * 1.0E-6D), 20);
+            double meanTickTime = mean(server.tickTimeArray) * 1.0E-6D;
 
-            tps.labels("tps").set(meanTickTime);
+            tps.labels("tps").set(Math.min(1000.0/meanTickTime, 20));
             tps.labels("meanticktime").set(meanTickTime);
             memory.labels("max").set(Runtime.getRuntime().maxMemory());
             memory.labels("free").set(Runtime.getRuntime().freeMemory());
