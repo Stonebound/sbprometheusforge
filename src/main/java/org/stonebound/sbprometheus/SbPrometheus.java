@@ -3,20 +3,19 @@ package org.stonebound.sbprometheus;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.HTTPServer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,15 +33,23 @@ public class SbPrometheus {
     private static final Gauge tps = Gauge.build().name("mc_tps").help("Tickrate").labelNames("state").create().register();
     private static final Gauge loadedChunks =
             Gauge.build().name("mc_loaded_chunks").help("Chunks loaded per world").labelNames("world").create().register();
+    private static final Gauge forcedChunks =
+            Gauge.build().name("mc_forced_chunks").help("Chunks force loaded per world").labelNames("world").create().register();
     private static final Gauge playersOnline =
             Gauge.build().name("mc_players_online").help("Players currently online per world").labelNames("world").create().register();
     private static final Gauge entities = Gauge.build().name("mc_entities").help("Entities loaded per world").labelNames("world").create().register();
     private static final Gauge tileEntities =
-            Gauge.build().name("mc_tile_entities").help("Entities loaded per world").labelNames("world").create().register();
+            Gauge.build().name("mc_tile_entities").help("block entities ticking per world").labelNames("world").create().register();
+    private static final Gauge blockTicks =
+            Gauge.build().name("mc_block_ticks").help("block ticks per world").labelNames("world").create().register();
+    private static final Gauge fluidTicks =
+            Gauge.build().name("mc_fluid_ticks").help("fluid ticks per world").labelNames("world").create().register();
+    private static final Gauge pendingTasks =
+            Gauge.build().name("mc_pending_tasks").help("pending tasks per world").labelNames("world").create().register();
     private static final Gauge memory = Gauge.build().name("mc_jvm_memory").help("JVM memory usage").labelNames("type").create().register();
 
     public SbPrometheus() {
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_CONFIG);
@@ -50,10 +57,9 @@ public class SbPrometheus {
     }
 
     @SubscribeEvent
-    public void onServerStarted(FMLServerStartedEvent event) {
+    public void onServerStarted(ServerStartedEvent event) {
         PORT = Config.PORT.get();
         try {
-//            new MetricsController().register();
             server = new HTTPServer(PORT, false);
             LOGGER.info("Started Prometheus metrics endpoint on port " + PORT);
 
@@ -63,7 +69,7 @@ public class SbPrometheus {
     }
 
     @SubscribeEvent
-    public void onServerStop(FMLServerStoppingEvent event) {
+    public void onServerStop(ServerStoppingEvent event) {
         if (server != null) {
             try {
                 server.stop();
@@ -80,16 +86,20 @@ public class SbPrometheus {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (serverTicks % 600 == 0) {
 
-            players.labels("online").set(server.getCurrentPlayerCount());
+            players.labels("online").set(server.getPlayerCount());
             players.labels("max").set(server.getMaxPlayers());
 
-            for (ServerWorld serverWorld : server.getWorlds()) {
-                loadedChunks.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getChunkProvider().chunkManager.getLoadedChunkCount());
-                playersOnline.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getPlayers().size());
-                entities.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getEntities().count());
-                tileEntities.labels(serverWorld.getDimensionKey().getLocation().toString()).set(serverWorld.getWorld().tickableTileEntities.size());
+            for (ServerLevel serverWorld : server.getAllLevels()) {
+                loadedChunks.labels(serverWorld.dimension().location().toString()).set(serverWorld.getChunkSource().getLoadedChunksCount());
+                forcedChunks.labels(serverWorld.dimension().location().toString()).set(serverWorld.getLevel().getForcedChunks().size());
+                playersOnline.labels(serverWorld.dimension().location().toString()).set(serverWorld.players().size());
+                entities.labels(serverWorld.dimension().location().toString()).set(serverWorld.getLevel().entityManager.knownUuids.size());
+                tileEntities.labels(serverWorld.dimension().location().toString()).set(serverWorld.getLevel().blockEntityTickers.size());
+                blockTicks.labels(serverWorld.dimension().location().toString()).set(serverWorld.getLevel().getBlockTicks().count());
+                fluidTicks.labels(serverWorld.dimension().location().toString()).set(serverWorld.getLevel().getFluidTicks().count());
+                pendingTasks.labels(serverWorld.dimension().location().toString()).set(serverWorld.getChunkSource().getPendingTasksCount());
             }
-            double meanTickTime = mean(server.tickTimeArray) * 1.0E-6D;
+            double meanTickTime = mean(server.tickTimes) * 1.0E-6D;
 
             tps.labels("tps").set(Math.min(1000.0/meanTickTime, 20));
             tps.labels("meanticktime").set(meanTickTime);
@@ -97,13 +107,6 @@ public class SbPrometheus {
             memory.labels("free").set(Runtime.getRuntime().freeMemory());
             memory.labels("used").set(Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory());
         }
-//        if (serverTicks % 60 == 0) {
-//            for (ServerWorld serverWorld : server.getWorlds()) {
-//                if (serverWorld.dimension.getType().getId() == 0) {
-//                    LOGGER.warn(serverWorld.getWorld().tickableTileEntities.size());
-//                }
-//            }
-//        }
         serverTicks++;
     }
 
