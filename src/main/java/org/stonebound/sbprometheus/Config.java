@@ -40,8 +40,4 @@ public class Config {
         configData.load();
         spec.setConfig(configData);
     }
-
-
-
-
 }
