@@ -1,5 +1,6 @@
 package org.stonebound.sbprometheus;
 
+import com.mojang.logging.LogUtils;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.HTTPServer;
 import net.minecraft.server.MinecraftServer;
@@ -7,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -16,8 +18,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkConstants;
 import net.minecraftforge.server.ServerLifecycleHooks;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 @Mod("sbprometheus")
 public class SbPrometheus {
@@ -25,8 +26,7 @@ public class SbPrometheus {
 
     public static Integer PORT = 9200;
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Gauge players =
             Gauge.build().name("mc_players_total").help("Total online and max players").labelNames("state").create().register();
@@ -57,7 +57,7 @@ public class SbPrometheus {
     }
 
     @SubscribeEvent
-    public void onServerStarted(ServerStartedEvent event) {
+    public void onServerStarted(final ServerStartedEvent event) {
         PORT = Config.PORT.get();
         try {
             server = new HTTPServer(PORT, false);
@@ -69,10 +69,21 @@ public class SbPrometheus {
     }
 
     @SubscribeEvent
-    public void onServerStop(ServerStoppingEvent event) {
+    public void onServerStop(final ServerStoppingEvent event) {
         if (server != null) {
             try {
-                server.stop();
+                server.close();
+            } catch (Exception e) {
+                LOGGER.error("error stopping", e);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerStopped(ServerStoppedEvent event) {
+        if (server != null) {
+            try {
+                server.close();
             } catch (Exception e) {
                 LOGGER.error("error stopping", e);
             }
@@ -82,7 +93,7 @@ public class SbPrometheus {
     private int serverTicks = 0;
 
     @SubscribeEvent
-    public void onServerTick(TickEvent.ServerTickEvent event) {
+    public void onServerTick(final TickEvent.ServerTickEvent event) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (serverTicks % 600 == 0) {
 
