@@ -1,43 +1,24 @@
 package org.stonebound.sbprometheus;
 
-import java.nio.file.Path;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.common.Mod;
-
-
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(modid = SbPrometheus.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Config {
-    public static final String CATEGORY_GENERAL = "general";
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.IntValue JETTY_PORT = BUILDER
+            .comment("jetty port")
+            .defineInRange("jettyPort", 9200, 1, 32000);
 
-    private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
+    static final ModConfigSpec SPEC = BUILDER.build();
 
-    public static ForgeConfigSpec COMMON_CONFIG;
+    public static int jettPort;
 
-    public static ForgeConfigSpec.IntValue PORT;
-
-    static {
-        COMMON_BUILDER.comment("General settings").push(CATEGORY_GENERAL);
-        COMMON_BUILDER.pop();
-
-        PORT = COMMON_BUILDER.comment("Port")
-                .defineInRange("jettyPort", 9200, 1, 32000);
-
-        COMMON_CONFIG = COMMON_BUILDER.build();
-    }
-
-
-    public static void loadConfig(ForgeConfigSpec spec, Path path) {
-
-        final CommentedFileConfig configData = CommentedFileConfig.builder(path)
-                .sync()
-                .autosave()
-                .writingMode(WritingMode.REPLACE)
-                .build();
-
-        configData.load();
-        spec.setConfig(configData);
+    @SubscribeEvent
+    static void onLoad(final ModConfigEvent event)
+    {
+        jettPort = JETTY_PORT.get();
     }
 }
