@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+#issueTrackerURL = ""
+license = "Insert License Here"
+
+[[mods]]
+modId = "sbprometheus"
+version = "${version}"
+displayName = "Stonebound Prometheus"
+authors = "Me!"
+description = '''
+This is an example description! Tell everyone what your mod is about!
+'''
+#logoFile = ""
+
+[[dependencies.sbprometheus]]
+modId = "neoforge"
+type = "required"
+versionRange = "[20.4,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.sbprometheus]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.20.4,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.sbprometheus]]
+modId = "architectury"
+type = "required"
+versionRange = "[11.1.17,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[mixins]]
+config = "sbprometheus.mixins.json"
