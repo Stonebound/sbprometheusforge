@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[2,)"
 #issueTrackerURL = ""
-license = "Insert License Here"
+license = "${mod_license}"
 
 [[mods]]
 modId = "sbprometheus"
