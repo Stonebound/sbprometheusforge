@@ -55,11 +55,12 @@ subprojects {
                     mod_license            : mod_license,
                     mod_version            : mod_version,
                     mod_authors            : mod_authors,
-                    mod_description        : mod_description
+                    mod_description        : mod_description,
+                    maven_group            : maven_group
             ]
             inputs.properties replaceProperties
 
-            filesMatching(['META-INF/mods.toml'] or ) {
+            filesMatching(['META-INF/mods.toml', 'quilt.mod.json', 'fabric.mod.json']  ) {
                 expand replaceProperties
             }
         }

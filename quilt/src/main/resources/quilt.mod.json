@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "quilt_loader": {
-    "group": "${group}",
-    "id": "sbprometheus",
-    "version": "${version}",
+    "group": "${maven_group}",
+    "id": "${mod_id}",
+    "version": "${mod_version}",
     "metadata": {
-      "name": "Stonebound Prometheus",
-      "description": "This is an example description! Tell everyone what your mod is about!",
+      "name": "${mod_name}",
+      "description": "${mod_description}",
       "contributors": {
-        "Me!": "Author"
+        "Me!": "${mod_authors}"
       },
       "icon": "assets/sbprometheus/icon.png"
     },
