@@ -17,6 +17,16 @@ subprojects {
     apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    configurations {
+
+        shadowBundle {
+            canBeResolved = true
+            canBeConsumed = false
+
+        }
+    }
 
     base {
         // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
@@ -39,12 +49,12 @@ subprojects {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings loom.officialMojangMappings()
 
-        implementation include("io.prometheus:simpleclient:0.14.1")
-        implementation include("io.prometheus:simpleclient_httpserver:0.14.1")
-        implementation include("io.prometheus:simpleclient_common:0.14.1")
-        implementation include("io.prometheus:simpleclient_hotspot:0.14.1")
-        implementation ("com.electronwill.night-config:core:3.6.4")
-        implementation ("com.electronwill.night-config:toml:3.6.4")
+        shadowBundle(implementation ("io.prometheus:simpleclient:0.14.1"))
+        shadowBundle(implementation ("io.prometheus:simpleclient_httpserver:0.14.1"))
+        shadowBundle(implementation ("io.prometheus:simpleclient_common:0.14.1"))
+        shadowBundle(implementation ("io.prometheus:simpleclient_hotspot:0.14.1"))
+        shadowBundle(implementation ("com.electronwill.night-config:core:3.6.4"))
+        shadowBundle(implementation ("com.electronwill.night-config:toml:3.6.4"))
 
 
 
@@ -99,6 +109,23 @@ subprojects {
             filesMatching(['META-INF/mods.toml', 'quilt.mod.json', 'fabric.mod.json']  ) {
                 expand replaceProperties
             }
+        }
+    }
+
+    shadowJar {
+        configurations = [project.configurations.shadowBundle]
+        archiveClassifier = 'dev-shadow'
+
+
+        //    relocate 'redis.clients', 'net.stonebound.shaded.redis.clients'
+        relocate 'io.prometheus', 'net.stonebound.sbprometheus.shaded.io.prometheus'
+        relocate 'com.electronwill', 'net.stonebound.sbprometheus.shaded.com.electronwill'
+
+
+        dependencies {
+            exclude(dependency("org.slf4j:.*:.*"))
+            exclude(dependency("org.jetbrains:.*:.*"))
+
         }
     }
 

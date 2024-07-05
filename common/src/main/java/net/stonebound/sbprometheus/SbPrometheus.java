@@ -51,8 +51,8 @@ public class SbPrometheus {
 
     public void onServerStarted(MinecraftServer instance) {
         try {
-            server = new HTTPServer(Config.jedisPort, false);
-            LOGGER.info("Started Prometheus metrics endpoint on port " + Config.jedisPort);
+            server = new HTTPServer(Config.jettysport, false);
+            LOGGER.info("Started Prometheus metrics endpoint on port " + Config.jettysport);
 
         } catch (Exception e) {
             LOGGER.error("Could not start embedded Jetty server", e);

@@ -15,7 +15,7 @@ import java.util.List;
 
 //ripped from phit's cwl
 public final class Config {
-	public static int jedisPort = 9200;
+	public static int jettysport = 9200;
 	public static final CommentedConfigSpec commonSpec;
 	public static CommentedFileConfig commonConfig;
 
@@ -29,9 +29,9 @@ public final class Config {
 
 		commonSpec = new CommentedConfigSpec();
 
-		commonSpec.comment("jedisPort",
-				"jedisPort");
-		commonSpec.defineInRange("jedisPort", jedisPort, 1, 32000);
+		commonSpec.comment("jettysport",
+				"jettysport");
+		commonSpec.defineInRange("jettysport", jettysport, 1, 32000);
 	}
 
 	private static final FileNotFoundAction MAKE_DIRECTORIES_AND_FILE = (file, configFormat) -> {
@@ -93,7 +93,7 @@ public final class Config {
 
 	public static void sync() {
 		if (commonConfig != null) {
-			Config.jedisPort = commonConfig.<Integer>get("jedisPort");
+			Config.jettysport = commonConfig.<Integer>get("jettysport");
 		}
 	}
 }
