@@ -1,4 +1,4 @@
-package org.stonebound.sbprometheus;
+package net.stonebound.sbprometheus;
 
 import com.mojang.logging.LogUtils;
 import io.prometheus.client.Gauge;

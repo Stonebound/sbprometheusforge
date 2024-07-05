@@ -1,4 +1,4 @@
-package org.stonebound.sbprometheus;
+package net.stonebound.sbprometheus;
 
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
