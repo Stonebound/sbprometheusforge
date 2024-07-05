@@ -43,6 +43,8 @@ subprojects {
         implementation include("io.prometheus:simpleclient_httpserver:0.14.1")
         implementation include("io.prometheus:simpleclient_common:0.14.1")
         implementation include("io.prometheus:simpleclient_hotspot:0.14.1")
+        implementation include("com.electronwill.night-config:core:3.6.4")
+        implementation include("com.electronwill.night-config:toml:3.6.4")
 
 
 
@@ -56,7 +58,41 @@ subprojects {
                     mod_version            : mod_version,
                     mod_authors            : mod_authors,
                     mod_description        : mod_description,
-                    maven_group            : maven_group
+                    maven_group            : maven_group,
+                    mod_contact           : mod_contact,
+                    mod_git                : mod_git,
+
+                    //Quilt
+                    quilt_architectury    : quilt_architectury,
+                    quilt_minecraft       : quilt_minecraft,
+                    quilt_quiltloader     : quilt_quiltloader,
+                    quilt_quiltbase       : quilt_quiltbase,
+
+                    //Fabric
+                    fabric_fabricloader   : fabric_fabricloader,
+                    fabric_minecraft      : fabric_minecraft,
+                    fabric_java           : fabric_java,
+                    fabric_architectury   : fabric_architectury,
+                    fabric_fabricapi      : fabric_fabricapi,
+
+                    //ForgeLikes
+                    forge_loaderversion    : forge_loaderversion,
+                    forge_loaderrange      : forge_loaderrange,
+                    forge_forgeside        : forge_forgeside,
+                    forge_minecraftrange   : forge_minecraftrange,
+                    forge_architecturyrange: forge_architecturyrange,
+                    forge_architecturyside : forge_architecturyside,
+
+                    //NeoForge
+                    neoforge_loaderversion : neoforge_loaderversion,
+                    neoforge_loaderrange   : neoforge_loaderrange,
+                    neoforge_neoforgeside   : neoforge_neoforgeside,
+                    neoforge_minecraftrange: neoforge_minecraftrange,
+                    neoforge_architecturyrange: neoforge_architecturyrange,
+                    neoforge_architecturyside: neoforge_architecturyside
+
+
+
             ]
             inputs.properties replaceProperties
 

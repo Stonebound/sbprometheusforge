@@ -1,35 +1,33 @@
 modLoader = "javafml"
-loaderVersion = "[49,)"
-#issueTrackerURL = ""
-license = "Insert License Here"
+loaderVersion = "${forge_loaderversion}"
+issueTrackerURL = "${mod_git}"
+license = "${mod_license}"
 
 [[mods]]
-modId = "sbprometheus"
+modId = "${mod_id}"
 version = "${version}"
-displayName = "Stonebound Prometheus"
-authors = "Me!"
-description = '''
-This is an example description! Tell everyone what your mod is about!
-'''
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = "${mod_description}"
 #logoFile = ""
 
-[[dependencies.sbprometheus]]
+[[dependencies."${mod_id}"]]
 modId = "forge"
 mandatory = true
-versionRange = "[49,)"
+versionRange = "${forge_loaderrange}"
 ordering = "NONE"
-side = "BOTH"
+side = "${forge_forgeside}"
 
-[[dependencies.sbprometheus]]
+[[dependencies."${mod_id}"]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.4,)"
+versionRange = "${forge_minecraftrange}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.sbprometheus]]
+[[dependencies."${mod_id}"]]
 modId = "architectury"
 mandatory = true
-versionRange = "[11.1.17,)"
+versionRange = "${forge_architecturyrange}"
 ordering = "AFTER"
-side = "BOTH"
+side = "${forge_architecturyside}"

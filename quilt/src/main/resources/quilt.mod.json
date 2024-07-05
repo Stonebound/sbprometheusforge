@@ -15,25 +15,25 @@
     "intermediate_mappings": "net.fabricmc:intermediary",
     "entrypoints": {
       "init": [
-        "net.stonebound.sbprometheus.quilt.ExampleModQuilt"
+        "net.stonebound.sbprometheus.quilt.SbPrometheusQuilt"
       ]
     },
     "depends": [
       {
         "id": "quilt_loader",
-        "version": "*"
+        "version": "${quilt_quiltloader}"
       },
       {
         "id": "quilt_base",
-        "version": "*"
+        "version": "${quilt_quiltbase}"
       },
       {
         "id": "minecraft",
-        "version": ">=1.20.4"
+        "version": "${quilt_minecraft}"
       },
       {
         "id": "architectury",
-        "version": ">=11.1.17"
+        "version": "${quilt_architectury}"
       }
     ]
   },

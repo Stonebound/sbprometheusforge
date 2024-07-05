@@ -1,38 +1,36 @@
 modLoader = "javafml"
-loaderVersion = "[2,)"
-#issueTrackerURL = ""
+loaderVersion = "${neoforge_loaderversion}"
+issueTrackerURL = "${mod_git}"
 license = "${mod_license}"
 
 [[mods]]
-modId = "sbprometheus"
+modId = "${mod_id}"
 version = "${mod_version}"
-displayName = "Stonebound Prometheus"
-authors = "Me!"
-description = '''
-This is an example description! Tell everyone what your mod is about!
-'''
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = "${mod_description}"
 #logoFile = ""
 
-[[dependencies.sbprometheus]]
+[[dependencies."${mod_id}"]]
 modId = "neoforge"
 type = "required"
-versionRange = "[20.4,)"
+versionRange = "${neoforge_loaderrange}"
 ordering = "NONE"
-side = "BOTH"
+side = "${neoforge_neoforgeside}"
 
-[[dependencies.sbprometheus]]
+[[dependencies."${mod_id}"]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.20.4,)"
+versionRange = "${neoforge_minecraftrange}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.sbprometheus]]
+[[dependencies."${mod_id}"]]
 modId = "architectury"
 type = "required"
-versionRange = "[11.1.17,)"
+versionRange = "${neoforge_architecturyrange}"
 ordering = "AFTER"
-side = "BOTH"
+side = "${neoforge_architecturyside}"
 
 [[mixins]]
 config = "sbprometheus.mixins.json"

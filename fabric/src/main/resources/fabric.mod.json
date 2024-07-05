@@ -1,36 +1,33 @@
 {
   "schemaVersion": 1,
-  "id": "sbprometheus",
-  "version": "${version}",
-  "name": "Stonebound Prometheus",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
-    "Me!"
+    "${mod_authors}"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "${mod_contact}",
+    "sources": "${mod_git}"
   },
-  "license": "CC0-1.0",
+  "license": "${mod_license}",
   "icon": "assets/sbprometheus/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.stonebound.sbprometheus.fabric.ExampleModFabric"
-    ],
-    "client": [
-      "net.stonebound.sbprometheus.fabric.client.ExampleModFabricClient"
+      "net.stonebound.sbprometheus.fabric.SbPrometheusFabric"
     ]
   },
   "mixins": [
     "sbprometheus.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.15.11",
-    "minecraft": "~1.20.4",
-    "java": ">=17",
-    "architectury": ">=11.1.17",
-    "fabric-api": "*"
+    "fabricloader": "${fabric_fabricloader}",
+    "minecraft": "${fabric_minecraft}",
+    "java": "${fabric_java}",
+    "architectury": "${fabric_architectury}",
+    "fabric-api": "${fabric_fabricapi}"
   },
   "suggests": {
     "another-mod": "*"
