@@ -16,21 +16,18 @@ modId = "neoforge"
 type = "required"
 versionRange = "${neoforge_loaderrange}"
 ordering = "NONE"
-side = "${neoforge_neoforgeside}"
+side = "BOTH"
 
 [[dependencies."${mod_id}"]]
 modId = "minecraft"
 type = "required"
-versionRange = "${neoforge_minecraftrange}"
+versionRange = "[${minecraft_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies."${mod_id}"]]
 modId = "architectury"
 type = "required"
-versionRange = "${neoforge_architecturyrange}"
+versionRange = "[${architectury_api_version},)"
 ordering = "AFTER"
-side = "${neoforge_architecturyside}"
-
-[[mixins]]
-config = "sbprometheus.mixins.json"
+side = "BOTH"

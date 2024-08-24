@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class SbPrometheus {
     private HTTPServer server;
 
@@ -46,8 +45,9 @@ public class SbPrometheus {
         LifecycleEvent.SERVER_STOPPING.register(this::onServerStop);
         LifecycleEvent.SERVER_STOPPED.register(this::onServerStopped);
         TickEvent.SERVER_POST.register(this::onServerTick);
+        LifecycleEvent.SERVER_STARTING.register(Config::serverStarting);
+        LifecycleEvent.SERVER_STOPPING.register(Config::serverStopping);
     }
-
 
     public void onServerStarted(MinecraftServer instance) {
         try {
@@ -58,7 +58,6 @@ public class SbPrometheus {
             LOGGER.error("Could not start embedded Jetty server", e);
         }
     }
-
 
     public void onServerStop(MinecraftServer instance) {
         if (server != null) {
@@ -83,7 +82,6 @@ public class SbPrometheus {
 
     private int serverTicks = 0;
 
-
     public void onServerTick(MinecraftServer instance) {
         if (serverTicks % 600 == 0) {
 
@@ -107,7 +105,7 @@ public class SbPrometheus {
             }
             double meanTickTime = mean(instance.getTickTimesNanos()) * 1.0E-6D;
 
-            tps.labels("tps").set(Math.min(1000.0/meanTickTime, 20));
+            tps.labels("tps").set(Math.min(1000.0 / meanTickTime, 20));
             tps.labels("meanticktime").set(meanTickTime);
             memory.labels("max").set(Runtime.getRuntime().maxMemory());
             memory.labels("free").set(Runtime.getRuntime().freeMemory());
@@ -116,12 +114,10 @@ public class SbPrometheus {
         serverTicks++;
     }
 
-    private static long mean(long[] values)
-    {
+    private static long mean(long[] values) {
         long sum = 0l;
-        for (long v : values)
-        {
-            sum+=v;
+        for (long v : values) {
+            sum += v;
         }
 
         return sum / values.length;

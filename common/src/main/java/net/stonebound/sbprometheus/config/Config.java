@@ -15,85 +15,86 @@ import java.util.List;
 
 //ripped from phit's cwl
 public final class Config {
-	public static int jettysport = 9200;
-	public static final CommentedConfigSpec commonSpec;
-	public static CommentedFileConfig commonConfig;
+    public static int jettysport = 9200;
+    public static final CommentedConfigSpec commonSpec;
+    public static CommentedFileConfig commonConfig;
 
-	private static final Path commonPath = Platform.getConfigFolder().resolve("sbprometheus-common.toml");
+    private static final Path commonPath = Platform.getConfigFolder().resolve("sbprometheus-common.toml");
 
-	private Config() {
-	}
+    private Config() {
+    }
 
-	static {
-		System.setProperty("nightconfig.preserveInsertionOrder", "true");
+    static {
+        System.setProperty("nightconfig.preserveInsertionOrder", "true");
 
-		commonSpec = new CommentedConfigSpec();
+        commonSpec = new CommentedConfigSpec();
 
-		commonSpec.comment("jettysport",
-				"jettysport");
-		commonSpec.defineInRange("jettysport", jettysport, 1, 32000);
-	}
+        commonSpec.comment("jettysport",
+                "jettysport");
+        commonSpec.defineInRange("jettysport", jettysport, 1, 32000);
+    }
 
-	private static final FileNotFoundAction MAKE_DIRECTORIES_AND_FILE = (file, configFormat) -> {
-		Files.createDirectories(file.getParent());
-		Files.createFile(file);
-		configFormat.initEmptyFile(file);
-		return false;
-	};
+    private static final FileNotFoundAction MAKE_DIRECTORIES_AND_FILE = (file, configFormat) -> {
+        Files.createDirectories(file.getParent());
+        Files.createFile(file);
+        configFormat.initEmptyFile(file);
+        return false;
+    };
 
-	private static CommentedFileConfig buildFileConfig(Path path) {
-		return CommentedFileConfig.builder(path)
-				.onFileNotFound(MAKE_DIRECTORIES_AND_FILE)
-				.preserveInsertionOrder()
-				.build();
-	}
+    private static CommentedFileConfig buildFileConfig(Path path) {
+        return CommentedFileConfig.builder(path)
+                .onFileNotFound(MAKE_DIRECTORIES_AND_FILE)
+                .preserveInsertionOrder()
+                .sync()
+                .build();
+    }
 
-	private static void saveConfig(UnmodifiableConfig config, CommentedConfigSpec spec, Path path) {
-		try (CommentedFileConfig fileConfig = buildFileConfig(path)) {
-			fileConfig.putAll(config);
-			spec.correct(fileConfig);
-			fileConfig.save();
-		}
-	}
+    private static void saveConfig(UnmodifiableConfig config, CommentedConfigSpec spec, Path path) {
+        try (CommentedFileConfig fileConfig = buildFileConfig(path)) {
+            fileConfig.putAll(config);
+            spec.correct(fileConfig);
+            fileConfig.save();
+        }
+    }
 
-	public static void save() {
-		if (commonConfig != null) {
-			saveConfig(commonConfig, commonSpec, commonPath);
-		}
-	}
+    public static void save() {
+        if (commonConfig != null) {
+            saveConfig(commonConfig, commonSpec, commonPath);
+        }
+    }
 
-	public static void Start() {
-		try (CommentedFileConfig config = buildFileConfig(commonPath)) {
-			config.load();
-			commonSpec.correct(config, Config::correctionListener);
-			config.save();
-			commonConfig = config;
-			sync();
-		}
-	}
+    public static void serverStarting(MinecraftServer server) {
+        try (CommentedFileConfig config = buildFileConfig(commonPath)) {
+            config.load();
+            commonSpec.correct(config, Config::correctionListener);
+            config.save();
+            commonConfig = config;
+            sync();
+        }
+    }
 
-	public static void serverStopping(MinecraftServer server) {
-		commonConfig = null;
-	}
+    public static void serverStopping(MinecraftServer server) {
+        commonConfig = null;
+    }
 
-	private static void correctionListener(ConfigSpec.CorrectionAction action, List<String> path, Object incorrectValue,
-										   Object correctedValue) {
-		String key = String.join(".", path);
-		switch (action) {
-			case ADD:
-				SbPrometheus.LOGGER.warn("Config key {} missing -> added default value.", key);
-				break;
-			case REMOVE:
-				SbPrometheus.LOGGER.warn("Config key {} not defined -> removed from config.", key);
-				break;
-			case REPLACE:
-				SbPrometheus.LOGGER.warn("Config key {} not valid -> replaced with default value.", key);
-		}
-	}
+    private static void correctionListener(ConfigSpec.CorrectionAction action, List<String> path, Object incorrectValue,
+                                           Object correctedValue) {
+        String key = String.join(".", path);
+        switch (action) {
+            case ADD:
+                SbPrometheus.LOGGER.warn("Config key {} missing -> added default value.", key);
+                break;
+            case REMOVE:
+                SbPrometheus.LOGGER.warn("Config key {} not defined -> removed from config.", key);
+                break;
+            case REPLACE:
+                SbPrometheus.LOGGER.warn("Config key {} not valid -> replaced with default value.", key);
+        }
+    }
 
-	public static void sync() {
-		if (commonConfig != null) {
-			Config.jettysport = commonConfig.<Integer>get("jettysport");
-		}
-	}
+    public static void sync() {
+        if (commonConfig != null) {
+            Config.jettysport = commonConfig.<Integer>get("jettysport");
+        }
+    }
 }

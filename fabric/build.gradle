@@ -35,6 +35,9 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+
+    shadowBundle(implementation("com.electronwill.night-config:core:$rootProject.nightconfig_version"))
+    shadowBundle(implementation("com.electronwill.night-config:toml:$rootProject.nightconfig_version"))
 }
 
 processResources {
@@ -48,6 +51,13 @@ processResources {
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
+
+    relocate 'com.electronwill', 'net.stonebound.SimpleIRCBridge.shaded.com.electronwill'
+
+    dependencies {
+        exclude(dependency("org.slf4j:.*:.*"))
+        exclude(dependency("org.jetbrains:.*:.*"))
+    }
 }
 
 remapJar {

@@ -49,19 +49,15 @@ subprojects {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings loom.officialMojangMappings()
 
-        shadowBundle(implementation ("io.prometheus:simpleclient:0.14.1"))
-        shadowBundle(implementation ("io.prometheus:simpleclient_httpserver:0.14.1"))
-        shadowBundle(implementation ("io.prometheus:simpleclient_common:0.14.1"))
-        shadowBundle(implementation ("io.prometheus:simpleclient_hotspot:0.14.1"))
-        shadowBundle(implementation ("com.electronwill.night-config:core:3.6.4"))
-        shadowBundle(implementation ("com.electronwill.night-config:toml:3.6.4"))
-
-
-
+        shadowBundle(implementation("io.prometheus:simpleclient:0.14.1"))
+        shadowBundle(implementation("io.prometheus:simpleclient_httpserver:0.14.1"))
+        shadowBundle(implementation("io.prometheus:simpleclient_common:0.14.1"))
+        shadowBundle(implementation("io.prometheus:simpleclient_hotspot:0.14.1"))
 
         tasks.withType(ProcessResources).configureEach {
             var replaceProperties = [
                     minecraft_version      : minecraft_version,
+                    architectury_api_version: architectury_api_version,
                     mod_id                 : mod_id,
                     mod_name               : mod_name,
                     mod_license            : mod_license,
@@ -69,44 +65,23 @@ subprojects {
                     mod_authors            : mod_authors,
                     mod_description        : mod_description,
                     maven_group            : maven_group,
-                    mod_contact           : mod_contact,
+                    mod_contact            : mod_contact,
                     mod_git                : mod_git,
 
-                    //Quilt
-                    quilt_architectury    : quilt_architectury,
-                    quilt_minecraft       : quilt_minecraft,
-                    quilt_quiltloader     : quilt_quiltloader,
-                    quilt_quiltbase       : quilt_quiltbase,
-
                     //Fabric
-                    fabric_fabricloader   : fabric_fabricloader,
-                    fabric_minecraft      : fabric_minecraft,
-                    fabric_java           : fabric_java,
-                    fabric_architectury   : fabric_architectury,
-                    fabric_fabricapi      : fabric_fabricapi,
-
-                    //ForgeLikes
-                    forge_loaderversion    : forge_loaderversion,
-                    forge_loaderrange      : forge_loaderrange,
-                    forge_forgeside        : forge_forgeside,
-                    forge_minecraftrange   : forge_minecraftrange,
-                    forge_architecturyrange: forge_architecturyrange,
-                    forge_architecturyside : forge_architecturyside,
+                    fabric_java            : fabric_java,
+                    fabric_fabricapi       : fabric_fabricapi,
+                    fabric_api_version     : fabric_api_version,
+                    fabric_loader_version  : fabric_loader_version,
 
                     //NeoForge
                     neoforge_loaderversion : neoforge_loaderversion,
                     neoforge_loaderrange   : neoforge_loaderrange,
-                    neoforge_neoforgeside   : neoforge_neoforgeside,
-                    neoforge_minecraftrange: neoforge_minecraftrange,
-                    neoforge_architecturyrange: neoforge_architecturyrange,
-                    neoforge_architecturyside: neoforge_architecturyside
-
-
-
+                    neoforge_version       : neoforge_version,
             ]
             inputs.properties replaceProperties
 
-            filesMatching(['META-INF/mods.toml', 'quilt.mod.json', 'fabric.mod.json']  ) {
+            filesMatching(['META-INF/neoforge.mods.toml', 'fabric.mod.json']) {
                 expand replaceProperties
             }
         }
@@ -116,16 +91,12 @@ subprojects {
         configurations = [project.configurations.shadowBundle]
         archiveClassifier = 'dev-shadow'
 
-
         //    relocate 'redis.clients', 'net.stonebound.shaded.redis.clients'
         relocate 'io.prometheus', 'net.stonebound.sbprometheus.shaded.io.prometheus'
-        relocate 'com.electronwill', 'net.stonebound.sbprometheus.shaded.com.electronwill'
-
 
         dependencies {
             exclude(dependency("org.slf4j:.*:.*"))
             exclude(dependency("org.jetbrains:.*:.*"))
-
         }
     }
 
@@ -135,12 +106,12 @@ subprojects {
         // If you remove this line, sources will not be generated.
         withSourcesJar()
 
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     tasks.withType(JavaCompile).configureEach {
-        it.options.release = 17
+        it.options.release = 21
     }
 
     // Configure Maven publishing.

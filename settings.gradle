@@ -11,6 +11,4 @@ rootProject.name = 'sbprometheus'
 
 include 'common'
 include 'fabric'
-include 'forge'
 include 'neoforge'
-include 'quilt'

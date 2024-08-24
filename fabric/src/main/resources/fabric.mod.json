@@ -19,17 +19,11 @@
       "net.stonebound.sbprometheus.fabric.SbPrometheusFabric"
     ]
   },
-  "mixins": [
-    "sbprometheus.mixins.json"
-  ],
   "depends": {
-    "fabricloader": "${fabric_fabricloader}",
-    "minecraft": "${fabric_minecraft}",
+    "fabricloader": ">=${fabric_loader_version}",
+    "minecraft": "~${minecraft_version}",
     "java": "${fabric_java}",
-    "architectury": "${fabric_architectury}",
+    "architectury": ">=${architectury_api_version}",
     "fabric-api": "${fabric_fabricapi}"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }
